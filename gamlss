@@ -1,0 +1,49 @@
+library(tidyverse)
+library(gamlss)
+
+theme_set(theme_bw()) 
+
+options(warn = -1)
+
+fig <- function(width, heigth){
+    options(repr.plot.width = width, repr.plot.height = heigth)
+}
+set.seed(42)
+
+train <- read_csv("../input/tabular-playground-series-aug-2021//train.csv")
+test <- read_csv("../input/tabular-playground-series-aug-2021//test.csv")
+sub <- read_csv("../input/tabular-playground-series-aug-2021//sample_submission.csv")
+
+loss_lamb <- forecast::BoxCox.lambda(train$loss)
+
+fig(14, 5)
+train %>% 
+    transmute(`a Original Loss` = loss, 
+              `b After Box-Cox transformation` = forecast::BoxCox(train$loss, loss_lamb)) %>% 
+    DataExplorer::plot_histogram(nrow = 5, ncol = 5, ggtheme = theme_bw())
+    
+    fig(14, 8)
+train %>% 
+    dplyr::select(-id) %>% 
+    DataExplorer::plot_correlation(ggtheme = theme_bw())
+    
+    
+features <- train %>%
+    dplyr::select(starts_with('f')) %>%
+    colnames() #%>%
+    #{glue::glue("'{.}'")}
+
+(form <- as.formula(glue::glue("loss ~ {paste0(features, collapse = '+')}")))
+
+fit <- gamlss(#formula = loss~ri(x.vars=c(paste0('f', 0:99)), Lp=0),
+              formula = form,
+              sigma.formula = form,
+              tau.formula = form,
+              family = ZINBI(),
+              control = gamlss.control(n.cyc = 200, trace=FALSE),
+              data = train# %>%
+                 #mutate(loss = forecast::BoxCox(.$loss, loss_lamb))
+                )
+  summary(fit)
+  
+  
