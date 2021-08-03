@@ -9,6 +9,7 @@
    "source": [
     "import numpy as np \n",
     "import pandas as pd \n",
+    "import seaborn as sns \n",
     "import os\n",
     "from statsmodels.stats.outliers_influence import variance_inflation_factor"
    ]
@@ -20,7 +21,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "train = pd.read_csv('/Users/lucywilliams/Downloads/tabular-playground-series-aug-2021/train.csv')\n"
+    "train = pd.read_csv('Users/lucywilliams/Downloads/tabular-playground-series-aug-2021/train.csv')\n"
    ]
   },
   {
